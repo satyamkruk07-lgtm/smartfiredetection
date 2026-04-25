@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Basic rules allowing read access to public data and write access to authenticated users
+    match /buildings/{buildingId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+      
+      match /rooms/{roomId} {
+        allow read: if true;
+        allow write: if request.auth != null;
+      }
+      
+      match /drones/{droneId} {
+        allow read: if true;
+        allow write: if request.auth != null;
+      }
+    }
+    
+    match /alerts/{alertId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

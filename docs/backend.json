@@ -1,0 +1,148 @@
+{
+  "entities": {
+    "Building": {
+      "title": "Building",
+      "description": "Represents a building monitored by the Aegis Prime system.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Room": {
+      "title": "Room",
+      "description": "A specific room within a building.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "safe",
+            "smoke",
+            "fire"
+          ]
+        },
+        "temperature": {
+          "type": "number"
+        },
+        "smokeLevel": {
+          "type": "number"
+        },
+        "gasLevel": {
+          "type": "number"
+        },
+        "connections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "status"
+      ]
+    },
+    "Drone": {
+      "title": "Drone",
+      "description": "An autonomous rescue drone.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "Active",
+            "Charging",
+            "Standby"
+          ]
+        },
+        "battery": {
+          "type": "number"
+        },
+        "location": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "status",
+        "battery"
+      ]
+    },
+    "Alert": {
+      "title": "Alert",
+      "description": "An active emergency alert.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "roomId": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "severity",
+        "timestamp"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "/buildings/{buildingId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Building"
+      },
+      "description": "Top-level collection of buildings."
+    },
+    "/buildings/{buildingId}/rooms/{roomId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Room"
+      },
+      "description": "Rooms within a building."
+    },
+    "/buildings/{buildingId}/drones/{droneId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Drone"
+      },
+      "description": "Drones assigned to a building."
+    },
+    "/alerts/{alertId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Alert"
+      },
+      "description": "Global emergency alerts."
+    }
+  }
+}
