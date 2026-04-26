@@ -4,7 +4,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Shield, ChevronRight, Play, Flame, Navigation, Cpu, Eye, Activity, AlertCircle } from 'lucide-react';
-import HeroSimulation from '@/components/HeroSimulation';
 import LiveSimulationCard from '@/components/LiveSimulationCard';
 import WorkflowSteps from '@/components/WorkflowSteps';
 
@@ -70,45 +69,25 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto px-8 py-12 min-h-[80vh] items-center">
-        <div className="space-y-8 animate-in slide-in-from-left duration-700">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tech-cyan/10 border border-tech-cyan/20 text-tech-cyan text-[10px] uppercase font-bold tracking-widest">
+      <section className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto px-8 py-24 min-h-[60vh] justify-center">
+        <div className="space-y-8 animate-in slide-in-from-bottom duration-700">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tech-cyan/10 border border-tech-cyan/20 text-tech-cyan text-[10px] uppercase font-bold tracking-widest mx-auto">
             <span className="w-1.5 h-1.5 rounded-full bg-tech-cyan animate-pulse" />
             Active Surveillance System
           </div>
           <h1 className="text-6xl md:text-7xl font-bold leading-[1.1] tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-tech-cyan/50">
             Smart Fire <br /> Detection & <br /> <span className="text-tech-cyan">Rescue System</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-lg leading-relaxed">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Real-time fire detection with autonomous drone guidance. Protecting lives through AI-driven emergency response.
           </p>
-          <div className="flex flex-wrap gap-4 pt-4">
+          <div className="flex flex-wrap justify-center gap-4 pt-4">
             <Link href="/dashboard" className="px-8 py-4 bg-red-500 text-white font-bold rounded-xl shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2">
               <Activity size={18} /> View Live Dashboard
             </Link>
             <button className="px-8 py-4 bg-white/5 border border-white/10 font-bold rounded-xl backdrop-blur-md flex items-center gap-3 hover:bg-white/10 transition-all duration-300">
               <Play size={18} fill="currentColor" /> Start Simulation
             </button>
-          </div>
-        </div>
-
-        {/* Live Simulation Visualizer */}
-        <div className="relative aspect-square rounded-3xl overflow-hidden glass border-tech-cyan/20 glow-border group">
-          {mounted && <HeroSimulation />}
-          
-          {/* Simulation Overlays */}
-          <div className="absolute top-6 left-6 flex flex-col gap-2">
-            <div className="glass px-4 py-2 rounded-xl border-white/10 flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
-              <div className="text-[10px] text-white uppercase font-bold tracking-widest">System Online</div>
-            </div>
-          </div>
-
-          <div className="absolute bottom-6 right-6 p-4 glass rounded-xl border-white/10 max-w-[200px]">
-             <div className="text-[10px] text-tech-cyan uppercase font-bold tracking-widest mb-2 flex items-center gap-2">
-               <Navigation size={10} /> Drone Status
-             </div>
-             <div className="text-sm font-medium text-white/90">Autonomous Unit En-Route to Sector 7B</div>
           </div>
         </div>
       </section>
@@ -146,4 +125,3 @@ export default function Home() {
     </main>
   );
 }
-
