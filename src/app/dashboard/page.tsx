@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Activity, Bell, Flame, Navigation, Thermometer, Wind, Droplets, Cpu, AlertTriangle } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import ThreeBuilding from '@/components/ThreeBuilding';
-import * as THREE from 'THREE';
+import * as THREE from 'three';
 
 const mockRooms = [
   { id: '101', pos: [-6, 0, -6] as [number, number, number], status: 'safe' as const, label: 'Sector 101' },
@@ -19,7 +19,7 @@ const mockRooms = [
   { id: '109', pos: [6, 0, 6] as [number, number, number], status: 'safe' as const, label: 'Sector 109' },
 ];
 
-// Refined tactical corridor-aware path
+// Refined tactical corridor-aware path following user instructions
 const dronePathMock = [
   new THREE.Vector3(6, 4, 6),   // Start: Sector 109
   new THREE.Vector3(0, 4, 6),   // Server Room Corridor
