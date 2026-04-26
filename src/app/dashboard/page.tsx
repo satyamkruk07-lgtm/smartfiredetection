@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Activity, Bell, Flame, Navigation, Thermometer, Wind, Droplets, Cpu, AlertTriangle } from 'lucide-react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import ThreeBuilding from '@/components/ThreeBuilding';
-import * as THREE from 'three';
+import * as THREE from 'THREE';
 
 const mockRooms = [
   { id: '101', pos: [-6, 0, -6] as [number, number, number], status: 'safe' as const, label: 'Sector 101' },
@@ -19,15 +19,17 @@ const mockRooms = [
   { id: '109', pos: [6, 0, 6] as [number, number, number], status: 'safe' as const, label: 'Sector 109' },
 ];
 
-// Path following corridors (avoiding straight lines through walls)
+// Refined tactical corridor-aware path
 const dronePathMock = [
-  new THREE.Vector3(10, 4, 10), // Starting high at exit
-  new THREE.Vector3(6, 4, 0),   // Exit hall
+  new THREE.Vector3(6, 4, 6),   // Start: Sector 109
+  new THREE.Vector3(0, 4, 6),   // Server Room Corridor
   new THREE.Vector3(0, 4, 0),   // Hub Center
-  new THREE.Vector3(-6, 4, 0),  // Lab 104 (Fire source)
-  new THREE.Vector3(0, 4, 0),   // Return to Hub
-  new THREE.Vector3(0, 4, 6),   // Corridor
-  new THREE.Vector3(10, 4, 0),  // Exit
+  new THREE.Vector3(-6, 4, 0),  // Lab 104 (Target: Fire)
+  new THREE.Vector3(0, 4, 0),   // Hub Center Return
+  new THREE.Vector3(0, 4, -6),  // Storage A Corridor
+  new THREE.Vector3(6, 4, -6),  // Corridor Corner
+  new THREE.Vector3(6, 4, 0),   // Exit Hall
+  new THREE.Vector3(10, 4, 0),  // Final Exit Point
 ];
 
 export default function DashboardPage() {
