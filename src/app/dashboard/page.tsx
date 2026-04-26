@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Activity, Bell, Flame, Navigation, Thermometer, Wind, Droplets, Cpu, AlertTriangle, FileText, Settings as SettingsIcon, ShieldCheck } from 'lucide-react';
 import Sidebar, { DashboardSection } from '@/components/dashboard/Sidebar';
 import ThreeBuilding from '@/components/ThreeBuilding';
+import DroneBay from '@/components/DroneBay';
 import * as THREE from 'three';
 
 const mockRooms = [
@@ -101,39 +102,59 @@ export default function DashboardPage() {
 
       case 'Drones':
         return (
-          <div className="flex-1 glass p-8 rounded-[2rem] border-white/5 overflow-y-auto custom-scrollbar">
-            <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 flex items-center gap-4">
-              <Cpu className="text-tech-cyan" size={32} /> Autonomous Response Units
-            </h2>
-            <div className="grid gap-6">
-              {[1, 2, 3].map((id) => (
-                <div key={id} className="glass p-6 rounded-3xl border-white/10 flex items-center justify-between group">
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-2xl bg-tech-cyan/10 border border-tech-cyan/20 flex items-center justify-center text-tech-cyan relative overflow-hidden">
-                       <Cpu size={32} className="group-hover:rotate-180 transition-transform duration-700" />
-                       <div className="absolute inset-0 bg-gradient-to-br from-tech-cyan/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex-1 flex flex-col gap-6 overflow-hidden">
+            <div className="h-1/2 glass rounded-[2rem] border-white/5 overflow-hidden relative group bg-[#080a0c]">
+               <div className="absolute top-8 left-8 z-10 space-y-2">
+                  <div className="glass px-4 py-2 rounded-xl border-tech-cyan/20 flex items-center gap-3">
+                    <Cpu size={16} className="text-tech-cyan animate-pulse" />
+                    <span className="text-[10px] font-black tracking-widest uppercase text-white">Hangar Bay 07 - Diagnostics</span>
+                  </div>
+                  <div className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">Autonomous Tactical Units</div>
+               </div>
+               <DroneBay />
+            </div>
+            <div className="flex-1 glass p-8 rounded-[2rem] border-white/5 overflow-y-auto custom-scrollbar">
+              <h2 className="text-2xl font-black uppercase tracking-tighter mb-8 flex items-center gap-4">
+                <ShieldCheck className="text-tech-cyan" size={24} /> Operational Conditions
+              </h2>
+              <div className="grid gap-6">
+                {[
+                  { id: 1, name: 'Unit-01 (Specter)', status: 'Active', battery: 78, task: 'Evacuation Guidance' },
+                  { id: 2, name: 'Unit-02 (Wraith)', status: 'Charging', battery: 42, task: 'Recharging Protocol' },
+                  { id: 3, name: 'Unit-03 (Ghost)', status: 'Standby', battery: 100, task: 'Ready for Deployment' },
+                ].map((d) => (
+                  <div key={d.id} className="glass p-6 rounded-3xl border-white/10 flex items-center justify-between group">
+                    <div className="flex items-center gap-6">
+                      <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center relative overflow-hidden ${d.status === 'Active' ? 'bg-tech-cyan/10 border-tech-cyan/20 text-tech-cyan' : d.status === 'Charging' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' : 'bg-green-500/10 border-green-500/20 text-green-500'}`}>
+                         <Cpu size={24} />
+                      </div>
+                      <div>
+                        <div className="text-lg font-black uppercase text-white">{d.name}</div>
+                        <div className="text-[10px] text-tech-cyan font-bold uppercase tracking-widest">{d.task}</div>
+                        <div className="flex items-center gap-4 mt-3">
+                           <div className="flex items-center gap-1 text-[9px] text-white/50 font-bold uppercase">
+                             <Activity size={12} className={d.status === 'Active' ? 'text-green-500' : 'text-white/20'} /> Core Integrity 100%
+                           </div>
+                           <div className="flex items-center gap-1 text-[9px] text-white/50 font-bold uppercase">
+                             <Thermometer size={12} className="text-tech-cyan" /> 32.4°C
+                           </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xl font-black uppercase text-white">Quadcopter 0{id}</div>
-                      <div className="text-xs text-tech-cyan font-bold uppercase tracking-widest">Tactical Recon & Guidance</div>
-                      <div className="flex items-center gap-4 mt-3">
-                         <div className="flex items-center gap-1 text-[10px] text-white/50 font-bold uppercase">
-                           <Activity size={12} className="text-green-500" /> Integrity 100%
-                         </div>
-                         <div className="flex items-center gap-1 text-[10px] text-white/50 font-bold uppercase">
-                           <Thermometer size={12} className="text-tech-cyan" /> Core 32°C
+                    <div className="text-right space-y-3">
+                      <div className={`inline-block px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${d.status === 'Active' ? 'bg-tech-cyan text-black' : d.status === 'Charging' ? 'bg-yellow-500 text-black' : 'bg-green-500 text-black'}`}>
+                        {d.status}
+                      </div>
+                      <div className="flex items-center justify-end gap-3">
+                         <span className="text-xs font-black text-white/60">{d.battery}%</span>
+                         <div className="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div className={`h-full ${d.battery < 30 ? 'bg-red-500' : 'bg-tech-cyan'}`} style={{ width: `${d.battery}%` }} />
                          </div>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right space-y-2">
-                    <div className="inline-block px-4 py-1.5 rounded-full bg-tech-cyan text-black text-[10px] font-black uppercase tracking-widest">
-                      {id === 1 ? 'Active' : 'Standby'}
-                    </div>
-                    <div className="text-sm font-black text-white/70">{id === 1 ? 'ETA: 02:14' : 'Ready'}</div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         );
