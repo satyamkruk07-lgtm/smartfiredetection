@@ -40,11 +40,11 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mountRef.current.appendChild(renderer.domElement);
 
-    // Realistic Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+    // Boosted Realistic Lighting for Visibility
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
     sunLight.position.set(15, 25, 10);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
@@ -56,12 +56,12 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     scene.add(sunLight);
 
     // Subtle blue rim light for tech feel
-    const rimLight = new THREE.PointLight(0x1F66AD, 0.5, 50);
+    const rimLight = new THREE.PointLight(0x1F66AD, 0.8, 50);
     rimLight.position.set(-15, 10, -15);
     scene.add(rimLight);
 
     // Floor Grid
-    const gridHelper = new THREE.GridHelper(50, 50, 0x1F66AD, 0x0a0c0e);
+    const gridHelper = new THREE.GridHelper(50, 50, 0x1F66AD, 0x1a1d23);
     gridHelper.position.y = -0.05;
     scene.add(gridHelper);
 
@@ -78,7 +78,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       // Floor
       const floorGeo = new THREE.BoxGeometry(w, 0.1, d);
       const floorMat = new THREE.MeshStandardMaterial({ 
-        color: 0x121417,
+        color: 0x1a1d23,
         roughness: 0.7,
         metalness: 0.1
       });
@@ -86,9 +86,9 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       floor.receiveShadow = true;
       roomGroup.add(floor);
 
-      // Walls Material
+      // Brighter Walls Material
       const wallMat = new THREE.MeshStandardMaterial({ 
-        color: 0x24282e, 
+        color: 0x3a3f47, 
         transparent: true, 
         opacity: 0.85,
         roughness: 0.9 
@@ -105,7 +105,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
         emissive: statusColor,
         emissiveIntensity: glowIntensity,
         transparent: true,
-        opacity: 0.15
+        opacity: 0.2
       });
       const glowPlane = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.2, d - 0.2), glowMat);
       glowPlane.rotation.x = -Math.PI / 2;
@@ -149,25 +149,25 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
 
       // Fire Animation Elements
       if (room.status === 'fire') {
-        const fireLight = new THREE.PointLight(0xef4444, 2.5, 8);
+        const fireLight = new THREE.PointLight(0xef4444, 3, 10);
         fireLight.position.set(0, 1, 0);
         roomGroup.add(fireLight);
         roomGroup.userData.fireLight = fireLight;
 
         // Particle group for fire simulation
-        const particleCount = 8;
+        const particleCount = 12;
         const particles: THREE.Mesh[] = [];
-        const partGeo = new THREE.SphereGeometry(0.2, 8, 8);
+        const partGeo = new THREE.SphereGeometry(0.25, 8, 8);
         for (let i = 0; i < particleCount; i++) {
           const partMat = new THREE.MeshBasicMaterial({ 
             color: 0xef4444, 
             transparent: true, 
-            opacity: 0.6 
+            opacity: 0.8 
           });
           const part = new THREE.Mesh(partGeo, partMat);
           part.position.set(
             (Math.random() - 0.5) * 1.5,
-            Math.random() * 1.5,
+            Math.random() * 2,
             (Math.random() - 0.5) * 1.5
           );
           roomGroup.add(part);
@@ -186,21 +186,21 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     const createDrone = () => {
       const droneGroup = new THREE.Group();
       
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.9, roughness: 0.2 });
-      const armMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.5 });
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5, roughness: 0.1 });
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.5 });
       
-      // Main Core
-      const core = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.15, 0.5), bodyMat);
+      // Main Core - WHITE as requested
+      const core = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.18, 0.5), bodyMat);
       core.castShadow = true;
       droneGroup.add(core);
 
       // Arms (Cross configuration)
       const armLength = 1.0;
-      const arm1 = new THREE.Mesh(new THREE.BoxGeometry(armLength, 0.05, 0.05), armMat);
+      const arm1 = new THREE.Mesh(new THREE.BoxGeometry(armLength, 0.05, 0.05), frameMat);
       arm1.rotation.y = Math.PI / 4;
       droneGroup.add(arm1);
 
-      const arm2 = new THREE.Mesh(new THREE.BoxGeometry(armLength, 0.05, 0.05), armMat);
+      const arm2 = new THREE.Mesh(new THREE.BoxGeometry(armLength, 0.05, 0.05), frameMat);
       arm2.rotation.y = -Math.PI / 4;
       droneGroup.add(arm2);
 
@@ -208,7 +208,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       const rotors: THREE.Mesh[] = [];
       const rotorPos = [[0.4, 0.08, 0.4], [-0.4, 0.08, 0.4], [0.4, 0.08, -0.4], [-0.4, 0.08, -0.4]];
       rotorPos.forEach(pos => {
-        const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 8), bodyMat);
+        const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.1, 8), frameMat);
         motor.position.set(pos[0], pos[1] - 0.04, pos[2]);
         droneGroup.add(motor);
 
@@ -222,23 +222,23 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       });
 
       // Tactical Light
-      const dLight = new THREE.PointLight(0x5EDEFF, 2, 8);
+      const dLight = new THREE.PointLight(0x5EDEFF, 2.5, 10);
       dLight.position.set(0, -0.2, 0);
       droneGroup.add(dLight);
 
       const lens = new THREE.Mesh(
-        new THREE.SphereGeometry(0.08, 8, 8),
+        new THREE.SphereGeometry(0.1, 8, 8),
         new THREE.MeshBasicMaterial({ color: 0x5EDEFF })
       );
       lens.position.set(0, -0.1, 0);
       droneGroup.add(lens);
 
       // Shadow Mesh
-      const shadowGeo = new THREE.CircleGeometry(0.5, 32);
-      const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3 });
+      const shadowGeo = new THREE.CircleGeometry(0.6, 32);
+      const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4 });
       const shadow = new THREE.Mesh(shadowGeo, shadowMat);
       shadow.rotation.x = -Math.PI / 2;
-      shadow.position.y = -3.5; // Adjusted in loop
+      shadow.position.y = -3.5; 
       scene.add(shadow);
 
       return { droneGroup, rotors, shadow };
@@ -252,7 +252,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     const exitSign = new THREE.Group();
     exitSign.position.copy(exitPos);
     
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.1, 3), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.1, 3), new THREE.MeshStandardMaterial({ color: 0x222222 }));
     exitSign.add(frame);
 
     const canvasExit = document.createElement('canvas');
@@ -273,8 +273,8 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     labelPlane.position.y = 0.06;
     exitSign.add(labelPlane);
 
-    const exitGlow = new THREE.PointLight(0x22c55e, 1.5, 5);
-    exitGlow.position.y = 0.5;
+    const exitGlow = new THREE.PointLight(0x22c55e, 2, 8);
+    exitGlow.position.y = 1;
     exitSign.add(exitGlow);
     scene.add(exitSign);
 
@@ -289,7 +289,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
         dashSize: 0.5, 
         gapSize: 0.2,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.9
       }));
       pathObj.computeLineDistances();
       scene.add(pathObj);
@@ -300,18 +300,20 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       const time = Date.now() * 0.001;
 
       // Rotor Animation
-      rotors.forEach(r => r.rotation.y += 0.4);
+      rotors.forEach(r => r.rotation.y += 0.5);
 
       // Fire & Light Flickering
       roomGroups.forEach((group, i) => {
         if (rooms[i].status === 'fire') {
           if (group.userData.fireLight) {
-            group.userData.fireLight.intensity = 2 + Math.sin(time * 20) * 0.5 + Math.random() * 0.3;
+            group.userData.fireLight.intensity = 3 + Math.sin(time * 15) * 1.0 + Math.random() * 0.5;
           }
           if (group.userData.fireParticles) {
             group.userData.fireParticles.forEach((p: THREE.Mesh, pi: number) => {
-              p.position.y = (Math.sin(time * 3 + pi) + 1.2);
-              p.scale.setScalar(0.8 + Math.sin(time * 5 + pi) * 0.2);
+              p.position.y = (Math.sin(time * 3 + pi) + 1.5);
+              p.scale.setScalar(0.9 + Math.sin(time * 6 + pi) * 0.3);
+              const mat = p.material as THREE.MeshBasicMaterial;
+              mat.opacity = 0.4 + Math.sin(time * 4 + pi) * 0.4;
             });
           }
         }
@@ -338,7 +340,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
 
       // Path Pulse
       if (pathObj) {
-        (pathObj.material as THREE.LineDashedMaterial).opacity = 0.4 + Math.sin(time * 5) * 0.4;
+        (pathObj.material as THREE.LineDashedMaterial).opacity = 0.5 + Math.sin(time * 5) * 0.4;
       }
 
       renderer.render(scene, camera);
