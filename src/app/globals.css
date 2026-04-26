@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -29,7 +30,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10;
   }
   .neon-blue {
     text-shadow: 0 0 10px #1F66AD, 0 0 20px #1F66AD;
@@ -41,15 +42,16 @@
     text-shadow: 0 0 10px #FF3131, 0 0 20px #FF3131;
   }
   .glow-border {
-    box-shadow: 0 0 15px rgba(94, 222, 255, 0.3);
+    box-shadow: 0 0 20px rgba(94, 222, 255, 0.15);
   }
   .glow-border-red {
-    box-shadow: 0 0 15px rgba(255, 49, 49, 0.4);
+    box-shadow: 0 0 30px rgba(255, 49, 49, 0.3);
   }
 }
 
 body {
-  @apply bg-[#111417] text-white overflow-x-hidden;
+  @apply bg-[#0a0c0e] text-white overflow-x-hidden;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 canvas {
@@ -61,7 +63,7 @@ canvas {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #111417;
+  background: #0a0c0e;
 }
 ::-webkit-scrollbar-thumb {
   background: #1F66AD;
@@ -69,4 +71,18 @@ canvas {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #5EDEFF;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(94, 222, 255, 0.1), transparent);
+  animation: scanline 4s linear infinite;
+  pointer-events: none;
 }

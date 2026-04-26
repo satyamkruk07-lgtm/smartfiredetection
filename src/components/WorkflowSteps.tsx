@@ -1,29 +1,33 @@
+
 import React from 'react';
-import { Search, Monitor, Disc as Drone, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Search, Monitor, Disc as Drone, ShieldCheck, ChevronRight, Flame } from 'lucide-react';
 
 const steps = [
-  { icon: Search, label: 'Fire Detection', description: 'Multi-sensor thermal scans' },
-  { icon: Monitor, label: 'Dashboard Update', description: 'Real-time hazard mapping' },
-  { icon: Drone, label: 'Drone Activation', description: 'Autonomous pathfinding' },
-  { icon: ShieldCheck, label: 'Safe Guidance', description: 'Rescue path visualization' },
+  { icon: Flame, label: 'Detection', description: 'Thermal sensor trigger' },
+  { icon: Monitor, label: 'Mapping', description: 'AI Path Calculation' },
+  { icon: Drone, label: 'Deployment', description: 'Drone unit activation' },
+  { icon: ShieldCheck, label: 'Safe Exit', description: 'Guided evacuation' },
 ];
 
 export default function WorkflowSteps() {
   return (
-    <div className="flex items-center justify-between gap-4 py-6 px-8 glass rounded-2xl">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-8 glass rounded-3xl border-white/5">
       {steps.map((step, index) => (
         <React.Fragment key={step.label}>
-          <div className="flex-1 flex items-center gap-4 group cursor-default">
-            <div className="w-12 h-12 rounded-xl bg-tech-blue/20 border border-tech-cyan/20 flex items-center justify-center text-tech-cyan group-hover:scale-110 group-hover:bg-tech-blue/40 transition-all duration-300 shadow-[0_0_15px_rgba(94,222,255,0.1)]">
-              <step.icon size={24} />
+          <div className="flex-1 flex flex-col items-center text-center gap-4 group cursor-default">
+            <div className="w-16 h-16 rounded-2xl bg-tech-blue/5 border border-tech-cyan/20 flex items-center justify-center text-tech-cyan group-hover:scale-110 group-hover:bg-tech-blue/20 group-hover:glow-border transition-all duration-500">
+              <step.icon size={28} />
             </div>
             <div>
               <div className="text-sm font-bold text-white group-hover:text-tech-cyan transition-colors">{step.label}</div>
-              <div className="text-[10px] text-muted-foreground leading-tight">{step.description}</div>
+              <div className="text-[10px] text-muted-foreground leading-tight mt-1 max-w-[100px]">{step.description}</div>
             </div>
           </div>
           {index < steps.length - 1 && (
-            <ChevronRight className="text-tech-cyan/20 animate-pulse" size={20} />
+            <div className="hidden md:flex flex-col items-center gap-1 opacity-20">
+              <ChevronRight className="text-tech-cyan animate-pulse" size={24} />
+              <div className="w-12 h-px bg-gradient-to-r from-transparent via-tech-cyan to-transparent" />
+            </div>
           )}
         </React.Fragment>
       ))}
