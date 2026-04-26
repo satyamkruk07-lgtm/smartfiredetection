@@ -6,6 +6,7 @@ import { Activity, Bell, Flame, Navigation, Thermometer, Wind, Droplets, Cpu, Al
 import Sidebar, { DashboardSection } from '@/components/dashboard/Sidebar';
 import ThreeBuilding from '@/components/ThreeBuilding';
 import DroneBay from '@/components/DroneBay';
+import SensorShowcase from '@/components/SensorShowcase';
 import * as THREE from 'three';
 
 const mockRooms = [
@@ -72,30 +73,42 @@ export default function DashboardPage() {
       
       case 'Sensors':
         return (
-          <div className="flex-1 glass p-8 rounded-[2rem] border-white/5 overflow-y-auto custom-scrollbar">
-            <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 flex items-center gap-4">
-              <Activity className="text-tech-cyan" size={32} /> Telemetry Matrix
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { label: 'Ambient Temp', val: '78.6°C', icon: Thermometer, color: 'text-red-500' },
-                { label: 'Aerosol Density', val: '92%', icon: Wind, color: 'text-yellow-500' },
-                { label: 'Gas Concentration', val: '350 ppm', icon: Droplets, color: 'text-tech-cyan' },
-                { label: 'O2 Saturation', val: '18.4%', icon: Activity, color: 'text-blue-500' },
-                { label: 'Thermal Flux', val: '1.2 kW/m²', icon: Flame, color: 'text-orange-500' },
-                { label: 'Node Connectivity', val: '99.9%', icon: Cpu, color: 'text-green-500' },
-              ].map((s, idx) => (
-                <div key={idx} className="glass p-6 rounded-2xl border-white/10 hover:bg-white/5 transition-all">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`p-3 rounded-xl bg-white/5 ${s.color}`}>
-                      <s.icon size={24} />
-                    </div>
-                    <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Live Node</span>
+          <div className="flex-1 flex flex-col gap-6 overflow-hidden">
+            <div className="h-[45%] glass rounded-[2rem] border-white/5 overflow-hidden relative group bg-[#080a0c]">
+               <div className="absolute top-8 left-8 z-10 space-y-2">
+                  <div className="glass px-4 py-2 rounded-xl border-tech-cyan/20 flex items-center gap-3">
+                    <Activity size={16} className="text-tech-cyan animate-pulse" />
+                    <span className="text-[10px] font-black tracking-widest uppercase text-white">IoT Hardware - Real-time Visualization</span>
                   </div>
-                  <div className="text-xs font-bold text-white/50 uppercase mb-1">{s.label}</div>
-                  <div className={`text-2xl font-black ${s.color}`}>{s.val}</div>
-                </div>
-              ))}
+                  <div className="text-[9px] font-bold text-white/40 uppercase tracking-widest ml-1">ESP32 • DHT22 • MQ-2 Matrix</div>
+               </div>
+               <SensorShowcase />
+            </div>
+            <div className="flex-1 glass p-8 rounded-[2rem] border-white/5 overflow-y-auto custom-scrollbar">
+              <h2 className="text-2xl font-black uppercase tracking-tighter mb-8 flex items-center gap-4">
+                <Activity className="text-tech-cyan" size={24} /> Telemetry Matrix
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  { label: 'Ambient Temp (DHT22)', val: '78.6°C', icon: Thermometer, color: 'text-red-500' },
+                  { label: 'Aerosol Density (DHT22)', val: '92%', icon: Wind, color: 'text-yellow-500' },
+                  { label: 'Gas Concentration (MQ-2)', val: '350 ppm', icon: Droplets, color: 'text-tech-cyan' },
+                  { label: 'O2 Saturation (MQ-2)', val: '18.4%', icon: Activity, color: 'text-blue-500' },
+                  { label: 'Thermal Flux (DHT22)', val: '1.2 kW/m²', icon: Flame, color: 'text-orange-500' },
+                  { label: 'ESP32 Connectivity', val: '99.9%', icon: Cpu, color: 'text-green-500' },
+                ].map((s, idx) => (
+                  <div key={idx} className="glass p-6 rounded-2xl border-white/10 hover:bg-white/5 transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-3 rounded-xl bg-white/5 ${s.color}`}>
+                        <s.icon size={24} />
+                      </div>
+                      <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Live Node</span>
+                    </div>
+                    <div className="text-xs font-bold text-white/50 uppercase mb-1">{s.label}</div>
+                    <div className={`text-2xl font-black ${s.color}`}>{s.val}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
