@@ -1,6 +1,29 @@
 import React from 'react';
 import { Activity, Cpu, Cloud, Monitor, Navigation, ShieldCheck, Bell, Lock, Zap, ChevronRight } from 'lucide-react';
 
+const DroneIcon = ({ size = 24 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m2 8 2 2" />
+    <path d="m20 8 2 2" />
+    <path d="m2 16 2-2" />
+    <path d="m20 16-2-2" />
+    <rect width="8" height="8" x="8" y="8" rx="2" />
+    <path d="M12 8v-2" />
+    <path d="M12 16v2" />
+    <path d="M8 12H6" />
+    <path d="M16 12h2" />
+  </svg>
+);
+
 const workflowSteps = [
   {
     number: 1,
@@ -41,7 +64,7 @@ const workflowSteps = [
   {
     number: 5,
     title: 'DRONE ACTION',
-    icon: Navigation,
+    icon: DroneIcon,
     color: 'text-tech-cyan',
     borderColor: 'border-tech-cyan/30',
     bgColor: 'bg-tech-cyan/5',
