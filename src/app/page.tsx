@@ -85,9 +85,6 @@ export default function Home() {
             <Link href="/dashboard" className="px-8 py-4 bg-red-500 text-white font-bold rounded-xl shadow-[0_0_25px_rgba(239,68,68,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-2">
               <Activity size={18} /> View Live Dashboard
             </Link>
-            <button className="px-8 py-4 bg-white/5 border border-white/10 font-bold rounded-xl backdrop-blur-md flex items-center gap-3 hover:bg-white/10 transition-all duration-300">
-              <Play size={18} fill="currentColor" /> Start Simulation
-            </button>
           </div>
         </div>
       </section>
