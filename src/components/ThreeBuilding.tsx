@@ -42,6 +42,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     mountRef.current.appendChild(renderer.domElement);
 
     // --- INTERACTION ---
+    // Re-initialized OrbitControls to ensure 360 degree rotation is functional
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -49,6 +50,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     controls.minDistance = 5;
     controls.maxDistance = 80;
     controls.rotateSpeed = 0.8;
+    controls.enableRotate = true;
     controls.update();
 
     // --- LIGHTING ---
@@ -72,25 +74,23 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     scene.add(gridHelper);
 
     // --- ROOM LABEL CREATOR ---
+    // Refined label creator with smaller font and reduced brightness
     const createRoomLabel = (text: string) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      // Higher resolution canvas for sharper text at smaller sizes
       canvas.width = 256;
       canvas.height = 64;
 
       if (ctx) {
         ctx.fillStyle = 'rgba(0,0,0,0)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // Smaller font size
-        ctx.font = 'bold 32px Space Grotesk';
+        ctx.font = 'bold 24px Space Grotesk';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // Subtle glow, not overpowering
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = 'rgba(94, 222, 255, 0.5)';
-        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(94, 222, 255, 0.3)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
         ctx.fillText(text, canvas.width / 2, canvas.height / 2);
       }
 
@@ -99,11 +99,10 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
         map: texture, 
         transparent: true, 
         depthTest: false,
-        opacity: 0.9 
+        opacity: 0.8 
       });
       const sprite = new THREE.Sprite(spriteMaterial);
-      // Smaller sprite scale
-      sprite.scale.set(4, 1, 1);
+      sprite.scale.set(3.5, 0.875, 1);
       return sprite;
     };
 
@@ -184,9 +183,9 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
         new THREE.MeshStandardMaterial({
           color: statusColor,
           emissive: statusColor,
-          emissiveIntensity: 0.8,
+          emissiveIntensity: 0.6,
           transparent: true,
-          opacity: 0.2
+          opacity: 0.15
         })
       );
       glowPlane.rotation.x = -Math.PI / 2;
@@ -195,7 +194,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
 
       // RESTORE ROOM LABEL
       const labelSprite = createRoomLabel(room.label);
-      labelSprite.position.y = h + 1.2;
+      labelSprite.position.y = h + 1.1;
       roomGroup.add(labelSprite);
 
       // Status Icon
@@ -209,7 +208,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       roomGroup.userData.icon = icon;
 
       // Status Light
-      const sLight = new THREE.PointLight(statusColor, 1.5, 10);
+      const sLight = new THREE.PointLight(statusColor, 1.2, 10);
       sLight.position.set(0, 1.5, 0);
       roomGroup.add(sLight);
       roomGroup.userData.light = sLight;
@@ -223,6 +222,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     // Drone
     const createDrone = () => {
       const g = new THREE.Group();
+      // White center body
       const body = new THREE.Mesh(
         new THREE.BoxGeometry(0.7, 0.25, 0.7), 
         new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.0 })
@@ -251,7 +251,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     // Exit
     const exitGroup = new THREE.Group();
     exitGroup.position.set(12, 0, 0);
-    const exitPlate = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.15, 3.5), new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 1.5 }));
+    const exitPlate = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.15, 3.5), new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 1.0 }));
     exitGroup.add(exitPlate);
     const exitLabel = createRoomLabel("EXIT");
     exitLabel.position.y = 2.5;
@@ -265,7 +265,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       const points = curve.getPoints(200);
       pathLine = new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(points), 
-        new THREE.LineDashedMaterial({ color: 0x5EDEFF, dashSize: 0.8, gapSize: 0.5, transparent: true, opacity: 0.7, depthWrite: false })
+        new THREE.LineDashedMaterial({ color: 0x5EDEFF, dashSize: 0.8, gapSize: 0.5, transparent: true, opacity: 0.6, depthWrite: false })
       );
       pathLine.computeLineDistances();
       scene.add(pathLine);
@@ -283,12 +283,12 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
         const icon = rg.userData.icon;
         const light = rg.userData.light;
         if (icon) {
-          icon.position.y = 3.1 + Math.sin(time * 3 + i) * 0.1;
-          icon.scale.setScalar(1 + Math.sin(time * 2.5 + i) * 0.05);
+          icon.position.y = 3.1 + Math.sin(time * 3 + i) * 0.05;
+          icon.scale.setScalar(1 + Math.sin(time * 2.5 + i) * 0.02);
           icon.rotation.y += 0.01;
         }
         if (light && rooms[i].status === 'fire') {
-          light.intensity = 2 + Math.sin(time * 25) * 0.5;
+          light.intensity = 1.5 + Math.sin(time * 25) * 0.4;
         }
       });
 
@@ -298,12 +298,12 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
         const curve = new THREE.CatmullRomCurve3(dronePath);
         const pos = curve.getPointAt(t);
         drone.position.copy(pos);
-        drone.position.y = 4.0 + Math.sin(time * 5) * 0.2;
-        drone.rotation.z = Math.sin(time * 3.5) * 0.1;
+        drone.position.y = 4.0 + Math.sin(time * 5) * 0.15;
+        drone.rotation.z = Math.sin(time * 3.5) * 0.05;
       }
 
       if (pathLine) {
-        (pathLine.material as THREE.LineDashedMaterial).opacity = 0.4 + Math.sin(time * 6) * 0.3;
+        (pathLine.material as THREE.LineDashedMaterial).opacity = 0.3 + Math.sin(time * 6) * 0.2;
       }
 
       renderer.render(scene, camera);
@@ -332,4 +332,3 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
 
   return <div ref={mountRef} className="w-full h-full cursor-move" style={{ touchAction: 'none' }} />;
 }
-
