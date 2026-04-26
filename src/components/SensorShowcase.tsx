@@ -42,171 +42,203 @@ export default function SensorShowcase() {
     grid.position.y = -2;
     scene.add(grid);
 
-    // --- ESP32 MODEL ---
+    // --- REFINED ESP32 MODEL ---
     const createESP32 = () => {
       const group = new THREE.Group();
-      // PCB
+      
+      // Black PCB
       const pcb = new THREE.Mesh(
-        new THREE.BoxGeometry(4, 0.1, 6),
-        new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.5, roughness: 0.2 })
+        new THREE.BoxGeometry(4, 0.15, 6),
+        new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8, roughness: 0.1 })
       );
       group.add(pcb);
 
-      // Pins (Gold)
-      const pinMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1 });
-      for (let i = -2.5; i <= 2.5; i += 0.5) {
-        const pinL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), pinMat);
-        pinL.position.set(-1.8, 0.2, i);
+      // Gold Pins
+      const pinMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1, roughness: 0.1 });
+      for (let i = -2.7; i <= 2.7; i += 0.4) {
+        const pinL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.1), pinMat);
+        pinL.position.set(-1.85, 0.2, i);
         group.add(pinL);
-        const pinR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.1), pinMat);
-        pinR.position.set(1.8, 0.2, i);
+        const pinR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.1), pinMat);
+        pinR.position.set(1.85, 0.2, i);
         group.add(pinR);
       }
 
-      // Silver Chip (ESP32)
+      // Main ESP32 Silver Chip with Labeling feel
       const chip = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 0.3, 2),
-        new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.8, roughness: 0.1 })
+        new THREE.BoxGeometry(1.8, 0.3, 2.2),
+        new THREE.MeshStandardMaterial({ color: 0xc0c0c0, metalness: 0.9, roughness: 0.05 })
       );
-      chip.position.set(0, 0.2, -1);
+      chip.position.set(0, 0.25, -1);
       group.add(chip);
 
-      // USB Port
+      // Micro USB Port
       const usb = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 0.4, 0.8),
-        new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9 })
+        new THREE.BoxGeometry(1.2, 0.4, 0.8),
+        new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9 })
       );
       usb.position.set(0, 0.2, 2.8);
       group.add(usb);
 
+      // Small Capacitors and ICs
+      const compMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+      for (let i = 0; i < 5; i++) {
+        const comp = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.3), compMat);
+        comp.position.set(Math.random() * 1.5 - 0.75, 0.15, Math.random() * 2 + 0.5);
+        group.add(comp);
+      }
+
       return group;
     };
 
-    // --- DHT22 MODEL (Temp/Humid) ---
+    // --- REFINED DHT22 MODEL (White Grid) ---
     const createDHT22 = () => {
       const group = new THREE.Group();
-      // Body
+      
+      // White Body
       const body = new THREE.Mesh(
-        new THREE.BoxGeometry(2, 0.5, 3),
-        new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.8 })
+        new THREE.BoxGeometry(2, 0.6, 3),
+        new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 })
       );
       group.add(body);
 
-      // Grid Pattern (Slight indentations)
-      const gridMat = new THREE.MeshStandardMaterial({ color: 0xcccccc });
-      for (let i = -1.2; i <= 1.2; i += 0.4) {
-        const line = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 0.1), gridMat);
-        line.position.set(0, 0.26, i);
-        group.add(line);
+      // Grid Slits
+      const gridMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+      for (let i = -1.1; i <= 1.1; i += 0.3) {
+        const slit = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.1, 0.1), gridMat);
+        slit.position.set(0, 0.31, i);
+        group.add(slit);
       }
 
       // PCB Base (Blue)
       const base = new THREE.Mesh(
-        new THREE.BoxGeometry(2.2, 0.1, 3.5),
-        new THREE.MeshStandardMaterial({ color: 0x1F66AD })
+        new THREE.BoxGeometry(2.3, 0.1, 3.5),
+        new THREE.MeshStandardMaterial({ color: 0x1F66AD, metalness: 0.5 })
       );
-      base.position.y = -0.3;
+      base.position.y = -0.35;
       group.add(base);
+
+      // Pins
+      const pinMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 1 });
+      for (let i = -0.5; i <= 0.5; i += 0.5) {
+        const pin = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.8, 0.05), pinMat);
+        pin.position.set(i, -0.6, 1.6);
+        group.add(pin);
+      }
 
       return group;
     };
 
-    // --- MQ-2 MODEL (Smoke/Gas) ---
+    // --- REFINED MQ-2 MODEL (Smoke Sensor) ---
     const createMQ2 = () => {
       const group = new THREE.Group();
-      // PCB Base (Blue)
+      
+      // Blue PCB Base
       const pcb = new THREE.Mesh(
-        new THREE.BoxGeometry(3, 0.1, 3.5),
-        new THREE.MeshStandardMaterial({ color: 0x1F66AD })
+        new THREE.BoxGeometry(3.2, 0.1, 3.8),
+        new THREE.MeshStandardMaterial({ color: 0x1F66AD, metalness: 0.6 })
       );
       group.add(pcb);
 
-      // Silver Cylinder (Sensor)
+      // Sensor Body (Silver Cylinder)
       const sensor = new THREE.Mesh(
-        new THREE.CylinderGeometry(1, 1, 1.2, 32),
-        new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 })
+        new THREE.CylinderGeometry(1.1, 1.1, 1.4, 32),
+        new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.1 })
       );
-      sensor.position.y = 0.6;
+      sensor.position.y = 0.75;
       group.add(sensor);
 
-      // Mesh Pattern on Top
+      // Top Mesh Screen (Darker)
       const mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.05, 1.05, 0.1, 32),
-        new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.9 })
+        new THREE.CylinderGeometry(1.15, 1.15, 0.15, 32),
+        new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 1 })
       );
-      mesh.position.y = 1.2;
+      mesh.position.y = 1.45;
       group.add(mesh);
+
+      // Gold Potentiometer (Adjustment screw)
+      const pot = new THREE.Mesh(
+        new THREE.BoxGeometry(0.5, 0.4, 0.5),
+        new THREE.MeshStandardMaterial({ color: 0x3333ff })
+      );
+      pot.position.set(1, 0.2, -1.2);
+      group.add(pot);
+      const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.1, 8), new THREE.MeshStandardMaterial({ color: 0xaaaaaa }));
+      screw.position.set(1, 0.45, -1.2);
+      group.add(screw);
 
       return group;
     };
 
-    // Platforms
-    const createPlatform = (x: number, z: number, color: number) => {
+    // Platform Helper
+    const createPlatform = (x: number, z: number, color: number, name: string) => {
+      const group = new THREE.Group();
+      group.position.set(x, -1.9, z);
+
       const geo = new THREE.BoxGeometry(6, 0.2, 6);
       const mat = new THREE.MeshStandardMaterial({ color: 0x0a0c0e, metalness: 0.9 });
       const plat = new THREE.Mesh(geo, mat);
-      plat.position.set(x, -1.9, z);
-      scene.add(plat);
+      group.add(plat);
 
-      // Glow Ring
-      const ringGeo = new THREE.TorusGeometry(3.5, 0.05, 16, 100);
+      // Hexagonal Glow Ring (Matching Image Style)
+      const ringGeo = new THREE.TorusGeometry(3.6, 0.08, 6, 100);
       const ringMat = new THREE.MeshBasicMaterial({ color: color });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.rotation.x = Math.PI / 2;
-      ring.position.set(x, -1.8, z);
-      scene.add(ring);
+      ring.position.y = 0.1;
+      group.add(ring);
 
-      // Label
+      // Label Sprite
       const canvas = document.createElement('canvas');
       canvas.width = 256;
       canvas.height = 64;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.font = 'bold 24px Space Grotesk';
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = 'bold 26px Space Grotesk';
         ctx.textAlign = 'center';
-        let name = "ESP32";
-        if (x < 0) name = "DHT22";
-        if (x > 0 && z === 0) name = "MQ-2";
         ctx.fillText(name, 128, 40);
       }
       const tex = new THREE.CanvasTexture(canvas);
       const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
-      sprite.position.set(x, -1, z + 4);
+      sprite.position.set(0, 1.2, 4);
       sprite.scale.set(4, 1, 1);
-      scene.add(sprite);
+      group.add(sprite);
+
+      scene.add(group);
+      return group;
     };
 
     const esp32 = createESP32();
     esp32.position.set(0, -1, -5);
     scene.add(esp32);
-    createPlatform(0, -5, 0x22c55e); // Green for controller
+    createPlatform(0, -5, 0x22c55e, "ESP32 (Controller)");
 
     const dht22 = createDHT22();
     dht22.position.set(-7, -1, 2);
-    dht22.rotation.y = Math.PI / 4;
+    dht22.rotation.y = Math.PI / 6;
     scene.add(dht22);
-    createPlatform(-7, 2, 0x5EDEFF); // Blue for temp
+    createPlatform(-7, 2, 0x5EDEFF, "DHT22 (Sensors)");
 
     const mq2 = createMQ2();
     mq2.position.set(7, -1, 2);
-    mq2.rotation.y = -Math.PI / 4;
+    mq2.rotation.y = -Math.PI / 6;
     scene.add(mq2);
-    createPlatform(7, 2, 0xeab308); // Yellow for smoke/gas
+    createPlatform(7, 2, 0xeab308, "MQ-2 (Smoke)");
 
     const animate = () => {
       requestAnimationFrame(animate);
       const time = Date.now() * 0.001;
 
-      // Gentle floating/rotation
-      esp32.rotation.y = Math.sin(time * 0.5) * 0.1;
-      esp32.position.y = -1 + Math.sin(time) * 0.1;
+      // Subtle hardware animation
+      esp32.rotation.y = Math.sin(time * 0.4) * 0.05;
+      esp32.position.y = -1 + Math.sin(time * 1.2) * 0.12;
 
-      dht22.rotation.y = Math.PI / 4 + Math.sin(time * 0.6) * 0.1;
-      dht22.position.y = -1 + Math.sin(time * 1.1) * 0.1;
+      dht22.rotation.y = Math.PI / 6 + Math.sin(time * 0.5) * 0.08;
+      dht22.position.y = -1 + Math.sin(time * 0.9) * 0.15;
 
-      mq2.rotation.y = -Math.PI / 4 + Math.sin(time * 0.4) * 0.1;
-      mq2.position.y = -1 + Math.sin(time * 0.9) * 0.1;
+      mq2.rotation.y = -Math.PI / 6 + Math.sin(time * 0.3) * 0.06;
+      mq2.position.y = -1 + Math.sin(time * 1.1) * 0.1;
 
       renderer.render(scene, camera);
     };
