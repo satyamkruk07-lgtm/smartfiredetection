@@ -29,109 +29,211 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     const scene = new THREE.Scene();
     scene.background = null;
 
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.set(12, 10, 12);
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+    camera.position.set(15, 12, 15);
     camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mountRef.current.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    // Realistic Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0x5EDEFF, 2);
-    pointLight.position.set(5, 10, 5);
-    scene.add(pointLight);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    sunLight.position.set(10, 20, 10);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    scene.add(sunLight);
 
-    // Create Floor Grid with tech feel
-    const gridHelper = new THREE.GridHelper(30, 30, 0x1F66AD, 0x111417);
-    gridHelper.position.y = -0.5;
+    // Floor Grid
+    const gridHelper = new THREE.GridHelper(40, 40, 0x1F66AD, 0x0a0c0e);
+    gridHelper.position.y = -0.01;
     scene.add(gridHelper);
 
-    // Rooms logic
-    const roomMeshes: THREE.Mesh[] = [];
-    const fireLights: THREE.PointLight[] = [];
+    // Create a realistic room function
+    const createRoom = (room: RoomData) => {
+      const roomGroup = new THREE.Group();
+      roomGroup.position.set(...room.pos);
 
-    rooms.forEach((room) => {
-      const geometry = new THREE.BoxGeometry(2, 1.5, 2);
-      let color = 0x22c55e; // green
-      let intensity = 0.2;
-      
-      if (room.status === 'smoke') {
-        color = 0xeab308; // yellow
-        intensity = 0.5;
-      }
-      if (room.status === 'fire') {
-        color = 0xef4444; // red
-        intensity = 2;
+      const roomWidth = 3.5;
+      const roomHeight = 2;
+      const roomDepth = 3.5;
+      const wallThickness = 0.15;
 
-        // Add a local light for fire glow
-        const fLight = new THREE.PointLight(0xef4444, 2, 5);
-        fLight.position.set(room.pos[0], room.pos[1] + 1, room.pos[2]);
-        scene.add(fLight);
-        fireLights.push(fLight);
-      }
+      // Floor
+      const floorGeo = new THREE.BoxGeometry(roomWidth, 0.05, roomDepth);
+      const floorMat = new THREE.MeshStandardMaterial({ 
+        color: 0x1a1c1e,
+        roughness: 0.8,
+        metalness: 0.2
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.receiveShadow = true;
+      roomGroup.add(floor);
 
-      const material = new THREE.MeshStandardMaterial({
-        color,
-        transparent: true,
-        opacity: room.status === 'fire' ? 0.8 : 0.4,
-        emissive: color,
-        emissiveIntensity: intensity,
+      // Walls
+      const wallMat = new THREE.MeshStandardMaterial({ 
+        color: 0x2a2c2e, 
+        transparent: true, 
+        opacity: 0.8,
+        roughness: 0.9 
       });
 
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.set(...room.pos);
-      mesh.userData = { id: room.id, status: room.status };
-      scene.add(mesh);
-      roomMeshes.push(mesh);
+      // Status overlay glow
+      let statusColor = 0x22c55e;
+      let glowIntensity = 0.1;
+      if (room.status === 'smoke') { statusColor = 0xeab308; glowIntensity = 0.4; }
+      if (room.status === 'fire') { statusColor = 0xef4444; glowIntensity = 1.2; }
 
-      // Edge glow for all rooms
-      const edges = new THREE.EdgesGeometry(geometry);
-      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ 
-        color: room.status === 'fire' ? 0xff0000 : 0xffffff, 
-        opacity: 0.5, 
-        transparent: true 
-      }));
-      line.position.set(...room.pos);
-      scene.add(line);
-    });
+      const statusMat = new THREE.MeshStandardMaterial({
+        color: statusColor,
+        emissive: statusColor,
+        emissiveIntensity: glowIntensity,
+        transparent: true,
+        opacity: 0.2
+      });
 
-    // Exit Sign (Glowing Gate)
-    const exitGeo = new THREE.BoxGeometry(1, 3, 0.2);
-    const exitMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 2 });
-    const exitSign = new THREE.Mesh(exitGeo, exitMat);
-    exitSign.position.set(8, 0.75, 0);
-    scene.add(exitSign);
+      const glowBox = new THREE.Mesh(new THREE.BoxGeometry(roomWidth - 0.2, roomHeight, roomDepth - 0.2), statusMat);
+      glowBox.position.y = roomHeight / 2;
+      roomGroup.add(glowBox);
 
-    // Drone (THE HERO)
-    const droneGroup = new THREE.Group();
-    const droneBody = new THREE.Mesh(
-      new THREE.SphereGeometry(0.4, 16, 16),
-      new THREE.MeshStandardMaterial({ color: 0x5EDEFF, emissive: 0x5EDEFF, emissiveIntensity: 3 })
-    );
-    droneGroup.add(droneBody);
-    
-    // Drone Light
-    const dLight = new THREE.PointLight(0x5EDEFF, 2, 8);
-    droneGroup.add(dLight);
-    
-    // Rotors (Visual only)
-    for(let i=0; i<4; i++) {
+      // Back Wall
+      const wallB = new THREE.Mesh(new THREE.BoxGeometry(roomWidth, roomHeight, wallThickness), wallMat);
+      wallB.position.set(0, roomHeight / 2, -roomDepth / 2);
+      roomGroup.add(wallB);
+
+      // Left Wall
+      const wallL = new THREE.Mesh(new THREE.BoxGeometry(wallThickness, roomHeight, roomDepth), wallMat);
+      wallL.position.set(-roomWidth / 2, roomHeight / 2, 0);
+      roomGroup.add(wallL);
+
+      // Labels (Canvas Sprites)
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 128;
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.fillStyle = 'rgba(0,0,0,0)';
+        context.fillRect(0,0,256,128);
+        context.font = 'bold 40px Space Grotesk';
+        context.textAlign = 'center';
+        context.fillStyle = 'white';
+        context.fillText(room.label, 128, 64);
+      }
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(3, 1.5, 1);
+      sprite.position.y = roomHeight + 0.5;
+      roomGroup.add(sprite);
+
+      if (room.status === 'fire') {
+        const fireLight = new THREE.PointLight(0xef4444, 2, 6);
+        fireLight.position.set(0, 1, 0);
+        roomGroup.add(fireLight);
+        roomGroup.userData.fireLight = fireLight;
+      }
+
+      scene.add(roomGroup);
+      return roomGroup;
+    };
+
+    const roomGroups = rooms.map(createRoom);
+
+    // Detailed Drone Model
+    const createDrone = () => {
+      const drone = new THREE.Group();
+
+      // Main Body
+      const body = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.2, 0.8),
+        new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.8, roughness: 0.2 })
+      );
+      body.castShadow = true;
+      drone.add(body);
+
+      // Arms
+      const armGeo = new THREE.BoxGeometry(1.2, 0.05, 0.05);
+      const armMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      
+      const arm1 = new THREE.Mesh(armGeo, armMat);
+      arm1.rotation.y = Math.PI / 4;
+      drone.add(arm1);
+      
+      const arm2 = new THREE.Mesh(armGeo, armMat);
+      arm2.rotation.y = -Math.PI / 4;
+      drone.add(arm2);
+
+      // Rotors
+      const rotors: THREE.Mesh[] = [];
+      const rotorPositions = [[0.6, 0.1, 0.6], [-0.6, 0.1, 0.6], [0.6, 0.1, -0.6], [-0.6, 0.1, -0.6]];
+      rotorPositions.forEach(pos => {
         const rotor = new THREE.Mesh(
-            new THREE.BoxGeometry(0.8, 0.05, 0.1),
-            new THREE.MeshBasicMaterial({ color: 0xffffff })
+          new THREE.BoxGeometry(0.6, 0.01, 0.04),
+          new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 })
         );
-        rotor.position.set(Math.cos(i * Math.PI/2) * 0.5, 0.2, Math.sin(i * Math.PI/2) * 0.5);
-        droneGroup.add(rotor);
+        rotor.position.set(pos[0], pos[1], pos[2]);
+        drone.add(rotor);
+        rotors.push(rotor);
+      });
+
+      // Status Light
+      const dLight = new THREE.PointLight(0x5EDEFF, 2, 5);
+      dLight.position.set(0, -0.2, 0);
+      drone.add(dLight);
+
+      const bottomLight = new THREE.Mesh(
+        new THREE.SphereGeometry(0.1, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0x5EDEFF })
+      );
+      bottomLight.position.set(0, -0.15, 0);
+      drone.add(bottomLight);
+
+      return { drone, rotors };
+    };
+
+    const { drone, rotors } = createDrone();
+    scene.add(drone);
+
+    // Exit Sign
+    const exitGroup = new THREE.Group();
+    exitGroup.position.set(8, 0, 0);
+    const exitGeo = new THREE.BoxGeometry(1.5, 0.2, 3);
+    const exitMat = new THREE.MeshStandardMaterial({ 
+      color: 0x22c55e, 
+      emissive: 0x22c55e, 
+      emissiveIntensity: 2 
+    });
+    const exitSign = new THREE.Mesh(exitGeo, exitMat);
+    exitGroup.add(exitSign);
+    
+    // EXIT Text
+    const exitCanvas = document.createElement('canvas');
+    exitCanvas.width = 128;
+    exitCanvas.height = 64;
+    const exitCtx = exitCanvas.getContext('2d');
+    if (exitCtx) {
+      exitCtx.fillStyle = '#22c55e';
+      exitCtx.fillRect(0,0,128,64);
+      exitCtx.font = 'bold 30px Space Grotesk';
+      exitCtx.fillStyle = 'white';
+      exitCtx.textAlign = 'center';
+      exitCtx.fillText('EXIT', 64, 45);
     }
+    const exitTex = new THREE.CanvasTexture(exitCanvas);
+    const exitLabel = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), new THREE.MeshBasicMaterial({ map: exitTex }));
+    exitLabel.rotation.x = -Math.PI / 2;
+    exitLabel.position.y = 0.11;
+    exitGroup.add(exitLabel);
+    scene.add(exitGroup);
 
-    droneGroup.position.set(0, 5, 0);
-    scene.add(droneGroup);
-
-    // Glowing Path Line
+    // Glowing Path
     let pathLine: THREE.Line | null = null;
     if (dronePath && dronePath.length > 1) {
       const curve = new THREE.CatmullRomCurve3(dronePath);
@@ -148,48 +250,37 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
 
     const animate = () => {
       requestAnimationFrame(animate);
-      
       const time = Date.now() * 0.001;
 
-      // Rotate building slowly
-      scene.rotation.y += 0.001;
+      // Rotate rotors
+      rotors.forEach(r => r.rotation.y += 0.5);
 
-      // Flickering Fire Effect
-      roomMeshes.forEach((mesh, index) => {
-        if (mesh.userData.status === 'fire') {
-          const flicker = 1.5 + Math.sin(time * 10) * 0.5 + Math.random() * 0.2;
-          (mesh.material as THREE.MeshStandardMaterial).emissiveIntensity = flicker;
-          
-          // Subtle pulse scale
-          const pulse = 1 + Math.sin(time * 5) * 0.02;
-          mesh.scale.set(pulse, pulse, pulse);
+      // Flickering Fire
+      roomGroups.forEach((group, index) => {
+        if (rooms[index].status === 'fire' && group.userData.fireLight) {
+          group.userData.fireLight.intensity = 2 + Math.sin(time * 15) * 1 + Math.random() * 0.5;
         }
       });
 
-      fireLights.forEach(light => {
-          light.intensity = 2 + Math.sin(time * 15) * 1 + Math.random() * 0.5;
-      });
-
-      // Drone Movement & Rotation
+      // Drone Movement
       if (dronePath && dronePath.length > 0) {
-        const loopTime = 8; // seconds
-        const t = (time % loopTime) / loopTime;
+        const t = (time % 10) / 10;
         const curve = new THREE.CatmullRomCurve3(dronePath);
         const position = curve.getPointAt(t);
-        droneGroup.position.copy(position);
+        drone.position.copy(position);
+        drone.position.y += Math.sin(time * 3) * 0.15; // Hover
         
-        // Bobbing motion
-        droneGroup.position.y += Math.sin(time * 4) * 0.1;
-        
-        // Tilt based on movement (simple mock)
-        droneGroup.rotation.z = Math.sin(time * 2) * 0.1;
-        droneGroup.rotation.x = Math.cos(time * 2) * 0.1;
+        // Dynamic Tilt
+        drone.rotation.z = Math.sin(time * 2) * 0.1;
+        drone.rotation.x = Math.cos(time * 2) * 0.1;
       }
 
-      // Path pulsing
+      // Path pulse
       if (pathLine) {
-          pathLine.material.opacity = 0.4 + Math.sin(time * 3) * 0.3;
+        pathLine.material.opacity = 0.4 + Math.sin(time * 4) * 0.4;
       }
+
+      scene.rotation.y = Math.PI / 8 + Math.sin(time * 0.2) * 0.05;
 
       renderer.render(scene, camera);
     };
@@ -215,5 +306,5 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     };
   }, [rooms, dronePath]);
 
-  return <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />;
+  return <div ref={mountRef} className="w-full h-full cursor-crosshair" />;
 }
