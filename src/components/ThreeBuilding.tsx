@@ -3,6 +3,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 interface RoomData {
   id: string;
@@ -40,21 +41,62 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mountRef.current.appendChild(renderer.domElement);
 
+    // --- INTERACTION ---
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 10;
+    controls.maxDistance = 50;
+    controls.maxPolarAngle = Math.PI / 2.1; // Limit tilt to stay above floor
+
     // --- LIGHTING ---
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
-    sunLight.position.set(10, 20, 10);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    sunLight.position.set(15, 25, 15);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 1024;
     sunLight.shadow.mapSize.height = 1024;
     scene.add(sunLight);
 
+    const floorLight = new THREE.PointLight(0x1F66AD, 0.5, 50);
+    floorLight.position.set(0, 10, 0);
+    scene.add(floorLight);
+
     // Grid Floor
     const gridHelper = new THREE.GridHelper(50, 40, 0x1F66AD, 0x1a1d23);
     gridHelper.position.y = -0.05;
     scene.add(gridHelper);
+
+    // --- ROOM LABEL CREATOR ---
+    const createRoomLabel = (text: string) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 512;
+      canvas.height = 128;
+
+      if (ctx) {
+        ctx.fillStyle = 'rgba(0,0,0,0)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 'bold 48px Space Grotesk';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Glow effect for text
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#5EDEFF';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(8, 2, 1);
+      return sprite;
+    };
 
     // --- ICON GENERATORS ---
     const createFireIcon = () => {
@@ -104,14 +146,13 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       const d = 4.5;
       const wallT = 0.25;
 
-      const floorMat = new THREE.MeshStandardMaterial({ color: 0x16191f, roughness: 0.8 });
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1d23, roughness: 0.8 });
       const floor = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, d), floorMat);
       floor.receiveShadow = true;
       roomGroup.add(floor);
 
-      const wallMat = new THREE.MeshStandardMaterial({ color: 0x444a54, metalness: 0.2, roughness: 0.9 });
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x333a45, metalness: 0.2, roughness: 0.9 });
       
-      // Walls with thickness
       const walls = [
         { size: [w, h, wallT], pos: [0, h/2, -d/2] }, // back
         { size: [wallT, h, d], pos: [-w/2, h/2, 0] }, // left
@@ -125,7 +166,7 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
         roomGroup.add(wall);
       });
 
-      // Interior Glow
+      // Status Colors
       let statusColor = 0x22c55e;
       if (room.status === 'smoke') statusColor = 0xffcc00;
       if (room.status === 'fire') statusColor = 0xff4400;
@@ -137,25 +178,30 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
           emissive: statusColor,
           emissiveIntensity: 0.8,
           transparent: true,
-          opacity: 0.15
+          opacity: 0.2
         })
       );
       glowPlane.rotation.x = -Math.PI / 2;
       glowPlane.position.y = 0.06;
       roomGroup.add(glowPlane);
 
-      // 3D Status Icon
+      // Label
+      const labelSprite = createRoomLabel(room.label);
+      labelSprite.position.y = h + 1.2;
+      roomGroup.add(labelSprite);
+
+      // Status Icon
       let icon;
       if (room.status === 'fire') icon = createFireIcon();
       else if (room.status === 'smoke') icon = createWarningIcon();
       else icon = createCheckIcon();
       
-      icon.position.y = 0.2;
+      icon.position.y = h + 0.2;
       roomGroup.add(icon);
       roomGroup.userData.icon = icon;
 
       // Status Light
-      const sLight = new THREE.PointLight(statusColor, 1.5, 6);
+      const sLight = new THREE.PointLight(statusColor, 1.5, 8);
       sLight.position.set(0, 1.5, 0);
       roomGroup.add(sLight);
       roomGroup.userData.light = sLight;
@@ -191,8 +237,11 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
     // Exit
     const exitGroup = new THREE.Group();
     exitGroup.position.set(10, 0, 0);
-    const exitPlate = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.1, 2.5), new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 0.5 }));
+    const exitPlate = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 3), new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 1 }));
     exitGroup.add(exitPlate);
+    const exitLabel = createRoomLabel("EXIT");
+    exitLabel.position.y = 3;
+    exitGroup.add(exitLabel);
     scene.add(exitGroup);
 
     // Path
@@ -209,13 +258,15 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
       requestAnimationFrame(animate);
       const time = Date.now() * 0.001;
 
+      controls.update();
+
       rotors.forEach(r => r.rotation.y += 0.5);
 
       roomGroups.forEach((rg, i) => {
         const icon = rg.userData.icon;
         const light = rg.userData.light;
         if (icon) {
-          icon.position.y = 0.5 + Math.sin(time * 3 + i) * 0.1;
+          icon.position.y = 2.7 + Math.sin(time * 3 + i) * 0.1;
           icon.scale.setScalar(1 + Math.sin(time * 2 + i) * 0.05);
         }
         if (light && rooms[i].status === 'fire') {
@@ -252,9 +303,10 @@ export default function ThreeBuilding({ rooms, onRoomClick, dronePath }: ThreeBu
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      controls.dispose();
       mountRef.current?.removeChild(renderer.domElement);
     };
   }, [rooms, dronePath]);
 
-  return <div ref={mountRef} className="w-full h-full cursor-crosshair" />;
+  return <div ref={mountRef} className="w-full h-full cursor-move" />;
 }
