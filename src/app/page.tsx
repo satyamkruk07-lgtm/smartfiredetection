@@ -111,7 +111,6 @@ export default function Home() {
 
       {/* Mini Workflow Animated */}
       <section className="relative z-10 max-w-7xl mx-auto px-8 pb-24">
-        <h2 className="text-center text-xs font-bold uppercase tracking-[0.4em] text-tech-cyan/50 mb-12">Emergency Workflow</h2>
         <WorkflowSteps />
       </section>
 
