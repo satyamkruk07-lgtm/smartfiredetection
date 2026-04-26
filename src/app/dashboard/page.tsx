@@ -22,15 +22,19 @@ const mockRooms = [
 ];
 
 const dronePathMock = [
-  new THREE.Vector3(6, 4, 6),
-  new THREE.Vector3(0, 4, 6),
-  new THREE.Vector3(0, 4, 0),
-  new THREE.Vector3(-6, 4, 0),
-  new THREE.Vector3(0, 4, 0),
-  new THREE.Vector3(0, 4, -6),
-  new THREE.Vector3(6, 4, -6),
-  new THREE.Vector3(6, 4, 0),
-  new THREE.Vector3(10, 4, 0),
+  new THREE.Vector3(6, 4, 6),   // Sector 109
+  new THREE.Vector3(3, 4, 6),   // Corridor
+  new THREE.Vector3(3, 4, 3),   // Corridor
+  new THREE.Vector3(0, 4, 3),   // Near Server Room
+  new THREE.Vector3(0, 4, 0),   // Hub Center
+  new THREE.Vector3(-3, 4, 0),  // Corridor to Lab
+  new THREE.Vector3(-6, 4, 0),  // Lab 104
+  new THREE.Vector3(-3, 4, 0),  // Back to Hub
+  new THREE.Vector3(0, 4, 0),   // Hub Center
+  new THREE.Vector3(0, 4, -3),  // Toward Storage A
+  new THREE.Vector3(3, 4, -3),  // Toward Exit Hall
+  new THREE.Vector3(6, 4, -3),  // Exit Hall
+  new THREE.Vector3(10, 4, 0),  // Final Exit
 ];
 
 export default function DashboardPage() {
@@ -65,7 +69,7 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-black tracking-[0.3em] uppercase text-red-500">Live Hazard Matrix</span>
               </div>
             </div>
-            <div className="flex-1 bg-[radial-gradient(circle_at_center,_rgba(31,102,173,0.08)_0%,_transparent_80%)]">
+            <div className="flex-1 bg-[radial-gradient(circle_at_center,_rgba(31,102,173,0.15)_0%,_transparent_80%)]">
               {mounted && <ThreeBuilding rooms={mockRooms} dronePath={dronePathMock} />}
             </div>
           </div>
